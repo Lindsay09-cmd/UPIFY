@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Upify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="brand">Up<span>ify</span>
+      <small style="margin-left:6px;">Ayuda entre estudiantes · BATIN &amp; BTICC</small>
+    </div>
+    <nav id="mainNav" class="main-nav" style="display:none">
+      <button type="button" class="nav-tab active" id="navDash" onclick="showView('dash')">Materiales</button>
+      <button type="button" class="nav-tab" id="navPreguntas" onclick="showView('preguntas')">Preguntas</button>
+    </nav>
+  </div>
+  <div id="userBadge">
+    <span id="userInfo"></span>
+    <button onclick="logout()">Cerrar sesión</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- LOGIN -->
+  <section class="view active" id="view-login">
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <h2>Iniciar sesión</h2>
+        <p class="sub">Entrá a Upify para ver y compartir ayuda con tus compañeros.</p>
+        <form onsubmit="return doLogin(event)">
+          <label for="li-email">Correo</label>
+          <input type="email" id="li-email" placeholder="nombre@colegio.edu.py" required>
+          <label for="li-pass">Contraseña</label>
+          <input type="password" id="li-pass" placeholder="••••••••" required>
+          <button class="btn" type="submit">Entrar</button>
+        </form>
+        <p class="switch-auth">¿No tenés cuenta? <a onclick="showView('register')">Registrate acá</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- REGISTER -->
+  <section class="view" id="view-register">
+    <div class="auth-wrap">
+      <div class="auth-card">
+        <h2>Crear cuenta</h2>
+        <p class="sub">Decinos quién sos para mostrarte lo que te sirve.</p>
+        <form onsubmit="return doRegister(event)">
+          <label for="re-name">Nombre completo</label>
+          <input type="text" id="re-name" placeholder="Ej: Ana Benítez" required>
+          <label for="re-email">Correo</label>
+          <input type="email" id="re-email" placeholder="nombre@colegio.edu.py" required>
+          <label for="re-pass">Contraseña</label>
+          <input type="password" id="re-pass" placeholder="Creá una contraseña" required>
+
+          <label>Sos...</label>
+          <div class="role-pick">
+            <label><input type="radio" name="role" value="Estudiante" checked><span>Estudiante</span></label>
+            <label><input type="radio" name="role" value="Docente"><span>Docente</span></label>
+          </div>
+
+          <label for="re-curso">Curso</label>
+          <select id="re-curso">
+            <option value="BATIN">Bachiller Técnico en Informática (BATIN)</option>
+            <option value="BTICC">Construcciones (BTICC)</option>
+          </select>
+
+          <label for="re-anio">Año</label>
+          <select id="re-anio">
+            <option value="1">1er año</option>
+            <option value="2">2do año</option>
+            <option value="3">3er año</option>
+          </select>
+
+          <button class="btn amber" type="submit">Crear cuenta</button>
+        </form>
+        <p class="switch-auth">¿Ya tenés cuenta? <a onclick="showView('login')">Iniciá sesión</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section class="view" id="view-dash">
+    <div class="dash-head">
+      <div>
+        <h1>Materiales de ayuda</h1>
+        <p>Videos tutoriales y fotos subidos por estudiantes y docentes para ponerte al día.</p>
+      </div>
+    </div>
+
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="Buscar por tema, materia o palabra clave..." oninput="renderGrid()">
+      <button class="btn amber" style="width:auto;margin:0;" onclick="renderGrid()">Buscar</button>
+    </div>
+
+    <div class="filters">
+      <select id="f-curso" onchange="renderGrid()">
+        <option value="">Todos los cursos</option>
+        <option value="BATIN">BATIN</option>
+        <option value="BTICC">BTICC</option>
+      </select>
+      <select id="f-anio" onchange="renderGrid()">
+        <option value="">Todos los años</option>
+        <option value="1">1er año</option>
+        <option value="2">2do año</option>
+        <option value="3">3er año</option>
+      </select>
+      <select id="f-materia" onchange="renderGrid()">
+        <option value="">Todas las materias</option>
+      </select>
+      <select id="f-tipo" onchange="renderGrid()">
+        <option value="">Todo tipo</option>
+        <option value="video">Solo videos</option>
+        <option value="foto">Solo fotos</option>
+      </select>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <!-- PREGUNTAS -->
+  <section class="view" id="view-preguntas">
+    <div class="dash-head">
+      <div>
+        <h1>Preguntas de la comunidad</h1>
+        <p>Publicá tu duda, elegí la materia y recibí respuestas de tus compañeros y docentes.</p>
+      </div>
+    </div>
+
+    <div class="ask-card">
+      <h2>Hacer una pregunta</h2>
+      <form onsubmit="return doAskQuestion(event)">
+        <div class="ask-fields">
+          <div>
+            <label for="pr-materia">Materia</label>
+            <select id="pr-materia" required></select>
+          </div>
+          <div>
+            <label for="pr-titulo">Título de tu pregunta</label>
+            <input type="text" id="pr-titulo" maxlength="120" placeholder="Ej: ¿Cómo resuelvo una ecuación de segundo grado?" required>
+          </div>
+          <div class="full">
+            <label for="pr-detalle">Detalles</label>
+            <textarea id="pr-detalle" placeholder="Contanos qué intentaste y dónde te trabaste." required></textarea>
+          </div>
+          <div class="full">
+            <label for="pr-foto">Adjuntar imagen (opcional)</label>
+            <input type="file" id="pr-foto" accept="image/*">
+            <div class="hint">Útil para fotos de ejercicios. Máximo 500 KB.</div>
+          </div>
+          <div class="full"><button class="btn amber" type="submit" style="width:auto;margin-top:0;">Publicar pregunta</button></div>
+        </div>
+      </form>
+    </div>
+
+    <div class="pr-layout">
+      <aside class="pr-filters">
+        <h2>Materias</h2>
+        <div class="chips" id="chipsMateria"></div>
+        <h2>Estado</h2>
+        <div class="chips" id="chipsEstado"></div>
+      </aside>
+
+      <section>
+        <div class="listhead">
+          <strong id="prTotal"></strong>
+          <input type="search" id="prBuscar" placeholder="Buscar preguntas…" aria-label="Buscar preguntas" oninput="qState.q=this.value;renderPreguntas()">
+        </div>
+        <div id="prLista"></div>
+      </section>
+    </div>
+  </section>
+
+</main>
+
+<footer>Upify — prototipo funcional. Las preguntas y respuestas se guardan en este navegador.</footer>
+
+<button class="fab" id="uploadFab" style="display:none" onclick="openUpload()">Subir ayuda</button>
+
+<!-- UPLOAD MODAL -->
+<div class="modal-bg" id="uploadModal">
+  <div class="modal">
+    <h2>Subir material de ayuda</h2>
+    <p class="sub">Compartí un video tutorial o fotos que le puedan servir a tus compañeros.</p>
+    <form onsubmit="return addResource(event)">
+      <label for="up-title">Título</label>
+      <input type="text" id="up-title" placeholder="Ej: Cómo armar una consulta SQL" required>
+
+      <label for="up-curso">Curso</label>
+      <select id="up-curso" onchange="fillMateriasUpload()" required></select>
+
+      <label for="up-anio">Año</label>
+      <select id="up-anio" onchange="fillMateriasUpload()" required>
+        <option value="1">1er año</option>
+        <option value="2">2do año</option>
+        <option value="3">3er año</option>
+      </select>
+
+      <label for="up-materia">Materia</label>
+      <select id="up-materia" required></select>
+
+      <label>Tipo de contenido</label>
+      <div class="type-pick">
+        <label><input type="radio" name="tipo" value="video" checked> Video tutorial</label>
+        <label><input type="radio" name="tipo" value="foto"> Foto de ayuda</label>
+      </div>
+
+      <label for="up-desc">Descripción breve</label>
+      <input type="text" id="up-desc" placeholder="¿Qué tarea o tema ayuda a resolver?" required>
+
+      <label for="up-file">Archivo (video o foto)</label>
+      <input type="file" id="up-file" accept="video/*,image/*">
+
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" onclick="closeUpload()">Cancelar</button>
+        <button type="submit" class="btn amber">Publicar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// ---------- datos base ----------
+const CURSOS = ["BATIN","BTICC"];
+const MATERIAS_BATIN = ["Guaraní","Literatura Castellana","Matemática","Matemática Aplicada","Inglés","Informática","Administración","Algorítmica","Física","Química","Software","Hardware"];
+const MATERIAS_BTICC = ["Guaraní","Literatura Castellana","Matemática","Matemática Aplicada","Inglés","Administración","Física","Química","AutoCAD"];
+const MATERIAS = ["1","2","3"].flatMap(anio => [
+  ...MATERIAS_BATIN.map(n => ({n, curso:"BATIN", anio})),
+  ...MATERIAS_BTICC.map(n => ({n, curso:"BTICC", anio})),
+]);
+const nombresUnicos = lista => [...new Set(lista.map(m => m.n))];
+
+let resources = [
+  {id:1, titulo:"Identificar los componentes de una PC", curso:"BATIN", anio:"2", materia:"Hardware", tipo:"video", desc:"Placa madre, memoria RAM y procesador explicados con una PC abierta.", autor:"Prof. Rojas", autorRol:"Docente", rank:0},
+  {id:2, titulo:"Foto del pizarrón: bucles for/while", curso:"BATIN", anio:"1", materia:"Algorítmica", tipo:"foto", desc:"Fotos de la clase del jueves sobre estructuras repetitivas.", autor:"María G.", autorRol:"Estudiante", rank:4},
+  {id:3, titulo:"Primeros pasos en AutoCAD: líneas y capas", curso:"BTICC", anio:"3", materia:"AutoCAD", tipo:"video", desc:"Cómo dibujar un plano básico con líneas, capas y cotas.", autor:"Prof. Duarte", autorRol:"Docente", rank:0},
+  {id:4, titulo:"Foto del pizarrón: regla de tres y porcentajes", curso:"BTICC", anio:"2", materia:"Matemática Aplicada", tipo:"foto", desc:"Ejemplos de proporciones aplicadas a medidas de obra.", autor:"Diego A.", autorRol:"Estudiante", rank:5},
+  {id:5, titulo:"Resolución de ecuaciones de segundo grado", curso:"BATIN", anio:"1", materia:"Matemática", tipo:"video", desc:"Paso a paso con fórmula general y ejemplos.", autor:"Prof. Ibarra", autorRol:"Docente", rank:0},
+];
+let nextId = 6;
+
+let session = null;
+
+// ---------- vistas ----------
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('uploadFab').style.display = (session && name==='dash') ? 'inline-block' : 'none';
+  document.getElementById('navDash').classList.toggle('active', name==='dash');
+  document.getElementById('navPreguntas').classList.toggle('active', name==='preguntas');
+  if(name==='dash' && session) renderGrid();
+  if(name==='preguntas' && session){ fillMateriaPreguntas(); renderPreguntas(); }
+}
+
+function doLogin(e){
+  e.preventDefault();
+  const email = document.getElementById('li-email').value;
+  session = {name: email.split('@')[0], role:"Estudiante", curso:"BATIN", anio:"1", email};
+  enterDash();
+  return false;
+}
+
+function doRegister(e){
+  e.preventDefault();
+  const name = document.getElementById('re-name').value;
+  const email = document.getElementById('re-email').value;
+  const role = document.querySelector('input[name=role]:checked').value;
+  const curso = document.getElementById('re-curso').value;
+  const anio = document.getElementById('re-anio').value;
+  session = {name, email, role, curso, anio};
+  enterDash();
+  return false;
+}
+
+function enterDash(){
+  document.getElementById('userBadge').style.display='flex';
+  document.getElementById('mainNav').style.display='flex';
+  document.getElementById('userInfo').textContent =
+    `${session.name} · ${session.role}${session.curso? ' · '+session.curso+' '+session.anio+'°':''}`;
+  document.getElementById('f-curso').value = session.curso || "";
+  document.getElementById('f-anio').value = session.anio || "";
+  fillMateriaFilter();
+  showView('dash');
+}
+
+function logout(){
+  session = null;
+  document.getElementById('userBadge').style.display='none';
+  document.getElementById('mainNav').style.display='none';
+  document.getElementById('uploadFab').style.display='none';
+  showView('login');
+}
+
+// ---------- filtros / materias ----------
+function fillMateriaFilter(){
+  const curso = document.getElementById('f-curso').value;
+  const anio = document.getElementById('f-anio').value;
+  const sel = document.getElementById('f-materia');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Todas las materias</option>' +
+    nombresUnicos(MATERIAS.filter(m => (!curso||m.curso===curso) && (!anio||m.anio===anio)))
+      .map(n=>`<option value="${n}">${n}</option>`).join('');
+  if([...sel.options].some(o=>o.value===current)) sel.value = current;
+}
+document.getElementById('f-curso').addEventListener('change', fillMateriaFilter);
+document.getElementById('f-anio').addEventListener('change', fillMateriaFilter);
+
+function fillMateriasUpload(){
+  const curso = document.getElementById('up-curso').value;
+  const anio = document.getElementById('up-anio').value;
+  const sel = document.getElementById('up-materia');
+  sel.innerHTML = MATERIAS.filter(m=>m.curso===curso && m.anio===anio)
+    .map(m=>`<option value="${m.n}">${m.n}</option>`).join('');
+  if(!sel.options.length){
+    sel.innerHTML = nombresUnicos(MATERIAS.filter(m=>m.curso===curso)).map(n=>`<option value="${n}">${n}</option>`).join('');
+  }
+}
+
+// ---------- grilla / búsqueda ----------
+function renderGrid(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const curso = document.getElementById('f-curso').value;
+  const anio = document.getElementById('f-anio').value;
+  const materia = document.getElementById('f-materia').value;
+  const tipo = document.getElementById('f-tipo').value;
+
+  const filtered = resources.filter(r=>{
+    if(curso && r.curso!==curso) return false;
+    if(anio && r.anio!==anio) return false;
+    if(materia && r.materia!==materia) return false;
+    if(tipo && r.tipo!==tipo) return false;
+    if(q && !(r.titulo.toLowerCase().includes(q) || r.materia.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  const grid = document.getElementById('grid');
+  if(!filtered.length){
+    grid.innerHTML = '<div class="empty">No encontramos materiales con esos filtros todavía. Probá cambiar la búsqueda o subí vos el primero.</div>';
+    return;
+  }
+  const puedeBorrar = r => session && r.autor === session.name;
+  const esDocente = session && session.role === "Docente";
+
+  grid.innerHTML = filtered.map(r=>`
+    <div class="card">
+      <div class="tag-row">
+        <span class="tag tipo-${r.tipo}">${r.tipo==='video'?'Video':'Foto'}</span>
+        <span class="tag rol-${r.autorRol.toLowerCase()}">${r.autorRol}</span>
+        <span class="tag">${r.curso} · ${r.anio}°</span>
+      </div>
+      <h3>${escapeHtml(r.titulo)}</h3>
+      <p><strong>${escapeHtml(r.materia)}</strong> — ${escapeHtml(r.desc)}</p>
+      ${renderRank(r, esDocente)}
+      <div class="meta">
+        Subido por ${escapeHtml(r.autor)}
+        ${puedeBorrar(r) ? `<button class="btn-del" onclick="deleteResource(${r.id})" title="Borrar este material">🗑 Borrar</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderRank(r, esDocente){
+  // Solo tiene sentido calificar contenido subido por estudiantes
+  if(r.autorRol !== "Estudiante") return '';
+
+  if(esDocente){
+    // Docente: estrellas clickeables para calificar
+    let stars = '';
+    for(let i=1;i<=5;i++){
+      stars += `<span class="star ${i<=r.rank?'filled':''}" onclick="rankResource(${r.id},${i})">★</span>`;
+    }
+    return `<div class="rank-row"><span class="rank-label">Calificar:</span>${stars}</div>`;
+  }
+
+  if(r.rank > 0){
+    // Estudiante/visitante: solo lectura
+    let stars = '';
+    for(let i=1;i<=5;i++){
+      stars += `<span class="star ${i<=r.rank?'filled':''}">★</span>`;
+    }
+    return `<div class="rank-row"><span class="rank-label">Valorado por un docente:</span>${stars}</div>`;
+  }
+  return '';
+}
+
+function rankResource(id, value){
+  if(!session || session.role !== "Docente") return; // solo docentes califican
+  const r = resources.find(x=>x.id===id);
+  if(!r || r.autorRol !== "Estudiante") return;
+  r.rank = (r.rank === value) ? 0 : value; // click de nuevo en la misma estrella = quitar calificación
+  renderGrid();
+}
+
+function deleteResource(id){
+  const r = resources.find(x=>x.id===id);
+  if(!r) return;
+  if(!confirm(`¿Borrar "${r.titulo}"? Esta acción no se puede deshacer.`)) return;
+  resources = resources.filter(x=>x.id!==id);
+  renderGrid();
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ---------- subir material ----------
+function openUpload(){
+  document.getElementById('up-curso').innerHTML = CURSOS.map(c=>`<option value="${c}">${c}</option>`).join('');
+  if(session && session.curso) document.getElementById('up-curso').value = session.curso;
+  if(session && session.anio) document.getElementById('up-anio').value = session.anio;
+  fillMateriasUpload();
+  document.getElementById('uploadModal').classList.add('active');
+}
+function closeUpload(){
+  document.getElementById('uploadModal').classList.remove('active');
+}
+function addResource(e){
+  e.preventDefault();
+  const r = {
+    id: nextId++,
+    titulo: document.getElementById('up-title').value,
+    curso: document.getElementById('up-curso').value,
+    anio: document.getElementById('up-anio').value,
+    materia: document.getElementById('up-materia').value,
+    tipo: document.querySelector('input[name=tipo]:checked').value,
+    desc: document.getElementById('up-desc').value,
+    autor: session ? session.name : "Anónimo",
+    autorRol: session ? session.role : "Estudiante",
+    rank: 0,
+  };
+  resources.unshift(r);
+  closeUpload();
+  document.getElementById('searchInput').value='';
+  fillMateriaFilter();
+  renderGrid();
+  e.target.reset();
+  return false;
+}
+
+fillMateriaFilter();
+
+// ---------- preguntas y respuestas ----------
+const PKEY = "upify_preguntas_v3";
+const MIN = 60000, HORA = 3600000, DIA = 86400000, T0 = Date.now();
+
+const preguntasEjemplo = () => [
+  { id:3, materia:"Algorítmica", curso:"BATIN", anio:"2", autor:"Prof. Rojas", rol:"docente", ts:T0-3*HORA,
+    titulo:"¿Cuál es la diferencia entre un for y un while?",
+    detalle:"Quiero reforzar esto antes del parcial, ¿alguien lo explica con un ejemplo simple?",
+    respuestas:[
+      {id:31, autor:"Lucas Coronel", rol:"estudiante", mejor:false, ts:T0-2*HORA, votantes:["Ana Benítez","Diego A."],
+       texto:"Usá for cuando sabés cuántas veces repetir; usá while cuando repetís hasta que se cumpla una condición."}
+    ]},
+  { id:2, materia:"Matemática", curso:"BATIN", anio:"1", autor:"Ana Benítez", rol:"estudiante", ts:T0-1*DIA,
+    titulo:"¿Cómo despejo la x en una ecuación de segundo grado?",
+    detalle:"Tengo x² + 5x + 6 = 0 y no sé si usar la fórmula o factorizar.",
+    respuestas:[
+      {id:21, autor:"Prof. Ibarra", rol:"docente", mejor:true, ts:T0-20*HORA, votantes:["Lucas Coronel"],
+       texto:"Conviene factorizar: buscá dos números que sumen 5 y multipliquen 6 → son 2 y 3, entonces (x+2)(x+3)=0."}
+    ]},
+  { id:1, materia:"AutoCAD", curso:"BTICC", anio:"2", autor:"Diego A.", rol:"estudiante", ts:T0-3*DIA,
+    titulo:"¿Cómo cambio la escala de un dibujo en AutoCAD?",
+    detalle:"Necesito un resumen corto para repasar antes del examen.",
+    respuestas:[] },
+];
+
+function cargarPreguntas(){
+  try{ const s = localStorage.getItem(PKEY); if(s) return JSON.parse(s); }catch(e){}
+  return preguntasEjemplo();
+}
+function guardarPreguntas(){
+  try{ localStorage.setItem(PKEY, JSON.stringify(preguntas)); }
+  catch(e){ alert("No se pudo guardar (¿imagen muy pesada?)."); }
+}
+let preguntas = cargarPreguntas();
+const qState = { materia:"Todas", estado:"todas", q:"", abiertas:new Set() };
+
+const uid = () => Date.now() + Math.floor(Math.random()*1000);
+const normTxt = s => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const esDocente = () => !!session && session.role === "Docente";
+const rolDeSesion = () => esDocente() ? "docente" : "estudiante";
+const dat = (a, p, r) => `data-a="${a}" data-p="${p.id}"${r ? ` data-r="${r.id}"` : ""}`;
+function hace(ts){
+  const d = Date.now() - ts;
+  if(d < MIN) return "hace un momento";
+  if(d < HORA) return `hace ${Math.floor(d/MIN)} min`;
+  if(d < DIA) return `hace ${Math.floor(d/HORA)} h`;
+  return `hace ${Math.floor(d/DIA)} d`;
+}
+function materiasDelCurso(curso){ return nombresUnicos(MATERIAS.filter(m=>m.curso===curso)); }
+function esResuelta(p){ return p.respuestas.some(r=>r.mejor); }
+
+function fillMateriaPreguntas(){
+  const curso = session ? session.curso : CURSOS[0];
+  const nombres = materiasDelCurso(curso);
+  document.getElementById('pr-materia').innerHTML = nombres.map(n=>`<option value="${n}">${n}</option>`).join('');
+  if(!nombres.includes(qState.materia)) qState.materia = "Todas";
+
+  document.getElementById('chipsMateria').innerHTML = ['Todas', ...nombres].map(m =>
+    `<button type="button" class="chip ${qState.materia===m?'active':''}" onclick="setMateriaPregunta('${m.replace(/'/g,"\\'")}')">${escapeHtml(m)}</button>`).join('');
+
+  const estados = [['todas','Todas'],['sin','Sin responder'],['resueltas','Resueltas']];
+  document.getElementById('chipsEstado').innerHTML = estados.map(([k,t])=>
+    `<button type="button" class="chip ${qState.estado===k?'active':''}" onclick="setEstadoPregunta('${k}')">${t}</button>`).join('');
+}
+function setMateriaPregunta(m){ qState.materia=m; fillMateriaPreguntas(); renderPreguntas(); }
+function setEstadoPregunta(k){ qState.estado=k; fillMateriaPreguntas(); renderPreguntas(); }
+
+function respuestaHTML(p, r){
+  const yo = session ? session.name : null;
+  const mia = r.autor === yo, votos = r.votantes.length;
+  let acc;
+  if(r.rep){
+    acc = `<span class="note">Reportada, en revisión.</span>` + (esDocente()
+      ? `<button type="button" class="lnk" ${dat('ok-r',p,r)}>Restaurar</button><button type="button" class="lnk danger" ${dat('del-r',p,r)}>Eliminar</button>` : '');
+  } else {
+    acc = (mia ? `<span class="votes">👍 ${votos}</span>`
+               : `<button type="button" class="lnk" ${dat('voto',p,r)} aria-pressed="${r.votantes.includes(yo)}">👍 Me sirvió (${votos})</button>`)
+      + (p.autor === yo && !esResuelta(p) ? `<button type="button" class="btn-best" ${dat('mejor',p,r)}>Marcar como mejor respuesta</button>` : '')
+      + (mia ? `<button type="button" class="lnk" ${dat('edit-r',p,r)}>Editar</button><button type="button" class="lnk danger" ${dat('del-r',p,r)}>Eliminar</button>`
+             : `<button type="button" class="lnk danger" ${dat('rep-r',p,r)}>Reportar</button>`);
+  }
+  return `
+    <div class="q-ans ${r.mejor?'best':''} ${r.rep?'rep':''}">
+      <div class="who"><strong>${escapeHtml(r.autor)}</strong>
+        ${r.rol==='docente' ? '<span class="badge docente">Docente</span>' : ''}
+        ${r.mejor ? '<span class="badge best">Mejor respuesta</span>' : ''}
+        <span>· ${hace(r.ts)}${r.editada ? ' (editada)' : ''}</span>
+      </div>
+      <p>${escapeHtml(r.texto)}</p>
+      <div class="acts">${acc}</div>
+    </div>`;
+}
+
+function preguntaHTML(p){
+  const n = p.respuestas.length, mia = session && session.name === p.autor;
+  const resp = [...p.respuestas].sort((a,b)=>(b.mejor?1:0)-(a.mejor?1:0) || b.votantes.length-a.votantes.length);
+  let acc;
+  if(p.rep){
+    acc = `<span class="note">Reportada, en revisión.</span>` + (esDocente()
+      ? `<button type="button" class="lnk" ${dat('ok-q',p)}>Restaurar</button><button type="button" class="lnk danger" ${dat('del-q',p)}>Eliminar</button>` : '');
+  } else {
+    acc = mia ? `<button type="button" class="lnk" ${dat('edit-q',p)}>Editar</button><button type="button" class="lnk danger" ${dat('del-q',p)}>Eliminar</button>`
+              : `<button type="button" class="lnk danger" ${dat('rep-q',p)}>Reportar</button>`;
+  }
+  return `
+    <article class="q-card ${esResuelta(p)?'solved':''} ${p.rep?'rep':''}">
+      <div class="q-count"><strong>${n}</strong><span>${n===1?'respuesta':'respuestas'}</span></div>
+      <div>
+        <div class="q-meta"><span class="tag">${escapeHtml(p.materia)}</span>
+          <span>${escapeHtml(p.autor)} · ${escapeHtml(p.curso)} ${escapeHtml(p.anio)}° · ${hace(p.ts)}${p.editada ? ' (editada)' : ''}</span></div>
+        <h3>${escapeHtml(p.titulo)}</h3>
+        <p>${escapeHtml(p.detalle)}</p>
+        ${p.img ? `<img class="adj" src="${p.img}" alt="Imagen adjunta a la pregunta">` : ''}
+        <div class="acts">${acc}</div>
+        <details ${qState.abiertas.has(p.id)?'open':''} ontoggle="toggleAbierta(${p.id}, this.open)">
+          <summary>${n ? 'Ver respuestas' : 'Responder'}</summary>
+          <div class="q-answers">${resp.map(r=>respuestaHTML(p,r)).join('')}</div>
+          <form class="q-reply" onsubmit="return doReply(event, ${p.id})">
+            <label for="rp${p.id}">Tu respuesta</label>
+            <textarea id="rp${p.id}" required placeholder="Explicá con tus palabras cómo lo resolverías."></textarea>
+            <button class="btn amber" type="submit" style="width:auto;margin-top:0;">Publicar respuesta</button>
+          </form>
+        </details>
+      </div>
+    </article>`;
+}
+
+function renderPreguntas(){
+  const curso = session ? session.curso : null;
+  const t = normTxt(qState.q.trim());
+  const lista = preguntas
+    .filter(p => !curso || p.curso===curso)
+    .filter(p => qState.materia==='Todas' || p.materia===qState.materia)
+    .filter(p => qState.estado==='todas' || (qState.estado==='sin' ? p.respuestas.length===0 : esResuelta(p)))
+    .filter(p => !t || normTxt(p.titulo+' '+p.detalle+' '+p.materia).includes(t))
+    .sort((a,b)=>b.ts-a.ts);
+
+  document.getElementById('prTotal').textContent = lista.length===1 ? '1 pregunta' : `${lista.length} preguntas`;
+  document.getElementById('prLista').innerHTML = lista.length
+    ? lista.map(preguntaHTML).join('')
+    : '<div class="empty">No hay preguntas con estos filtros todavía. Probá otra búsqueda o publicá la primera arriba.</div>';
+}
+function refrescarPreguntas(){ guardarPreguntas(); renderPreguntas(); }
+
+function toggleAbierta(id, open){
+  if(open) qState.abiertas.add(id); else qState.abiertas.delete(id);
+}
+
+// Acciones de los botones de cada pregunta/respuesta
+document.getElementById('prLista').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-a]'); if(!b) return;
+  const a = b.dataset.a;
+  const p = preguntas.find(x=>x.id===Number(b.dataset.p)); if(!p) return;
+  const r = b.dataset.r ? p.respuestas.find(x=>x.id===Number(b.dataset.r)) : null;
+  const yo = session ? session.name : null;
+
+  if(a==='mejor' && r){ r.mejor = true; }
+  else if(a==='voto' && r){
+    const i = r.votantes.indexOf(yo);
+    if(i>=0) r.votantes.splice(i,1); else r.votantes.push(yo);
+  }
+  else if(a==='edit-q'){
+    const t = prompt('Editar título:', p.titulo); if(t===null || !t.trim()) return;
+    const d = prompt('Editar detalles:', p.detalle); if(d===null || !d.trim()) return;
+    p.titulo = t.trim(); p.detalle = d.trim(); p.editada = true;
+  }
+  else if(a==='edit-r' && r){
+    const t = prompt('Editar tu respuesta:', r.texto); if(t===null || !t.trim()) return;
+    r.texto = t.trim(); r.editada = true;
+  }
+  else if(a==='del-q'){ if(!confirm('¿Eliminar esta pregunta y sus respuestas?')) return; preguntas = preguntas.filter(x=>x!==p); }
+  else if(a==='del-r' && r){ if(!confirm('¿Eliminar esta respuesta?')) return; p.respuestas = p.respuestas.filter(x=>x!==r); }
+  else if(a==='rep-q'){ if(!confirm('¿Reportar esta pregunta como inapropiada?')) return; p.rep = true; }
+  else if(a==='rep-r' && r){ if(!confirm('¿Reportar esta respuesta como inapropiada?')) return; r.rep = true; }
+  else if(a==='ok-q'){ p.rep = false; }
+  else if(a==='ok-r' && r){ r.rep = false; }
+  refrescarPreguntas();
+});
+
+function doAskQuestion(e){
+  e.preventDefault();
+  const form = e.target, archivo = document.getElementById('pr-foto').files[0];
+  const publicar = img => {
+    preguntas.unshift({
+      id: uid(), ts: Date.now(),
+      materia: document.getElementById('pr-materia').value,
+      curso: session ? session.curso : CURSOS[0],
+      anio: session ? session.anio : "1",
+      autor: session ? session.name : "Anónimo",
+      rol: rolDeSesion(),
+      titulo: document.getElementById('pr-titulo').value.trim(),
+      detalle: document.getElementById('pr-detalle').value.trim(),
+      img, respuestas: [],
+    });
+    form.reset();
+    qState.materia='Todas'; qState.estado='todas'; qState.q='';
+    document.getElementById('prBuscar').value='';
+    fillMateriaPreguntas();
+    refrescarPreguntas();
+  };
+  if(!archivo){ publicar(null); return false; }
+  if(archivo.size > 500*1024){ alert('La imagen supera los 500 KB.'); return false; }
+  const lector = new FileReader();
+  lector.onload = () => publicar(lector.result);
+  lector.readAsDataURL(archivo);
+  return false;
+}
+
+function doReply(e, pid){
+  e.preventDefault();
+  const p = preguntas.find(x=>x.id===pid);
+  if(!p) return false;
+  p.respuestas.push({
+    id: uid(), ts: Date.now(),
+    autor: session ? session.name : "Anónimo",
+    rol: rolDeSesion(),
+    mejor: false, votantes: [],
+    texto: e.target.querySelector('textarea').value.trim(),
+  });
+  qState.abiertas.add(pid);
+  refrescarPreguntas();
+  return false;
+}
+
+// Actualiza los "hace X min" cada minuto
+setInterval(()=>{
+  if(session && document.getElementById('view-preguntas').classList.contains('active')) renderPreguntas();
+}, 60000);
+</script>
+</body>
+</html>
